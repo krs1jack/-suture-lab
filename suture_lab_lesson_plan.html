@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Medical Interest Club — Suture Lab Lesson Plan</title>
+  <style>
+    :root {
+      --red: #c0392b;
+      --dark: #1a1a2e;
+      --mid: #16213e;
+      --accent: #e74c3c;
+      --light: #f8f9fa;
+      --card: #ffffff;
+      --border: #e0e0e0;
+      --teal: #0f7b82;
+      --green: #27ae60;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--light);
+      color: #222;
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, var(--dark), var(--mid));
+      color: white;
+      padding: 2.5rem 1.5rem 2rem;
+      text-align: center;
+    }
+    header .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      margin-bottom: 0.75rem;
+    }
+    header h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.4rem; }
+    header p { font-size: 1rem; opacity: 0.85; }
+    .meta-bar {
+      display: flex; flex-wrap: wrap; justify-content: center;
+      gap: 1rem; background: var(--accent); padding: 0.75rem 1rem;
+    }
+    .meta-bar .meta-item {
+      color: white; font-size: 0.9rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    main { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+    section { margin-bottom: 2.5rem; }
+    h2 {
+      font-size: 1.3rem; font-weight: 800; color: var(--dark);
+      border-left: 4px solid var(--accent); padding-left: 0.75rem; margin-bottom: 1.25rem;
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .schedule-grid {
+      display: grid; grid-template-columns: 110px 1fr;
+      gap: 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--border);
+    }
+    .schedule-grid .time {
+      background: var(--dark); color: white; font-weight: 700; font-size: 0.85rem;
+      padding: 0.85rem 1rem; display: flex; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .schedule-grid .event {
+      background: white; padding: 0.85rem 1rem; display: flex; align-items: center;
+      font-size: 0.95rem; border-bottom: 1px solid var(--border);
+    }
+    .station-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .station-grid { grid-template-columns: 1fr; } }
+    .station-card {
+      background: white; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .station-header {
+      padding: 0.75rem 1rem; font-weight: 800; font-size: 1rem;
+      color: white; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .station-header.blue { background: var(--teal); }
+    .station-header.red { background: var(--accent); }
+    .station-body { padding: 1rem; font-size: 0.92rem; }
+    .station-body ul { padding-left: 1.2rem; }
+    .station-body li { margin-bottom: 0.4rem; }
+    .product-card {
+      display: flex; gap: 1rem; background: white; border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; margin-bottom: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .product-card img {
+      width: 120px; min-width: 120px; object-fit: contain;
+      padding: 0.75rem; background: #f7f7f7;
+    }
+    .product-info {
+      padding: 0.9rem 1rem 0.9rem 0;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .product-info h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--dark); }
+    .product-info p { font-size: 0.83rem; color: #555; margin-bottom: 0.5rem; }
+    .btn {
+      display: inline-block; background: #ff9900; color: white; font-size: 0.78rem;
+      font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 20px;
+      text-decoration: none; width: fit-content;
+    }
+    @media (max-width: 500px) {
+      .product-card { flex-direction: column; }
+      .product-card img { width: 100%; min-width: unset; height: 160px; }
+    }
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .video-card {
+      background: white; border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .video-thumb { position: relative; display: block; }
+    .video-thumb img { width: 100%; height: 150px; object-fit: cover; display: block; }
+    .play-btn {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px; height: 48px; background: rgba(255,0,0,0.85);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
+    .play-btn::after {
+      content: ''; border-style: solid;
+      border-width: 8px 0 8px 16px;
+      border-color: transparent transparent transparent white;
+      margin-left: 3px;
+    }
+    .video-info { padding: 0.85rem; }
+    .video-info .tag {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.3rem;
+    }
+    .video-info h3 { font-size: 0.88rem; font-weight: 700; color: var(--dark); margin-bottom: 0.25rem; }
+    .video-info p { font-size: 0.78rem; color: #666; }
+    .intro-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.85rem; margin-top: 0.5rem; }
+    .intro-option {
+      background: white; border: 2px solid var(--border); border-radius: 10px;
+      padding: 1rem; font-size: 0.88rem; color: #333;
+    }
+    .intro-option .opt-num { font-size: 1.4rem; margin-bottom: 0.4rem; }
+    .intro-option strong { display: block; font-size: 0.83rem; color: var(--dark); margin-bottom: 0.25rem; }
+    .resource-links a {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--dark); color: white; padding: 0.5rem 1rem;
+      border-radius: 8px; text-decoration: none; font-size: 0.88rem;
+      font-weight: 600; margin: 0.3rem 0.3rem 0.3rem 0;
+    }
+    .tip-box {
+      background: #fffbea; border-left: 4px solid #f1c40f;
+      border-radius: 0 8px 8px 0; padding: 0.85rem 1rem;
+      font-size: 0.9rem; color: #555; margin-top: 0.75rem;
+    }
+    footer {
+      text-align: center; padding: 1.5rem; background: var(--dark);
+      color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="badge">🩺 Medical Interest Club</div>
+  <h1>Suture Lab — Lesson Plan</h1>
+  <p>A hands-on clinical skills session for high school students</p>
+</header>
+<div class="meta-bar">
+  <div class="meta-item">📍 Hillside High School — Ms. Hood's Classroom, Room 210</div>
+  <div class="meta-item">🕓 3:45 PM – 5:00 PM</div>
+  <div class="meta-item">📅 Tuesday, May 19</div>
+  <div class="meta-item">🍕 Food After!</div>
+</div>
+<main>
+  <section>
+    <h2>📋 Session Schedule</h2>
+    <div class="schedule-grid">
+      <div class="time">3:45 PM</div><div class="event">Arrival &amp; Setup</div>
+      <div class="time">3:50 PM</div><div class="event">⭐ 5-Min Group Introduction — Instructor intros + session overview</div>
+      <div class="time">3:55 PM</div><div class="event">🩹 Station Rotation Begins — 20 minutes per station</div>
+      <div class="time">4:15 PM</div><div class="event">🔄 Stations Rotate</div>
+      <div class="time">4:35 PM</div><div class="event">Wrap-up, Q&amp;A, and debrief</div>
+      <div class="time">4:45 PM</div><div class="event">🍕 Food &amp; informal time</div>
+      <div class="time">5:00 PM</div><div class="event">End of session</div>
+    </div>
+  </section>
+  <section>
+    <h2>🏥 Station Overview</h2>
+    <div class="station-grid">
+      <div class="station-card">
+        <div class="station-header blue">🩹 Station 1 — Suturing</div>
+        <div class="station-body"><ul>
+          <li>Simple interrupted suture technique</li>
+          <li>Pre-cut &amp; non-pre-cut wound pads</li>
+          <li>Needle driver, forceps, scissors</li>
+          <li>Suture thread &amp; needles provided</li>
+        </ul></div>
+      </div>
+      <div class="station-card">
+        <div class="station-header red">🫀 Station 2 — CPR &amp; Trauma</div>
+        <div class="station-body"><ul>
+          <li>Hands-only CPR: rate, depth, placement</li>
+          <li>Tourniquet application (one-hand method)</li>
+          <li>Gunshot wound packing simulation</li>
+          <li>Splinting (teddy bear leg scenario)</li>
+          <li>Fake blood for realism!</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2>🛠️ Equipment &amp; Supplies</h2>
+    <div class="product-card">
+      <img src="https://m.media-amazon.com/images/I/81WDSxx4q3L._SX522_.jpg" alt="Medarchitect Suture Kit"/>
+      <div class="product-info">
+        <h3>Medarchitect Suture Practice Complete Kit (30 Pieces)</h3>
+        <p>14 pre-cut wounds, non-pre-cut pads, needle driver, forceps, scissors, suture thread &amp; needles. Ideal for beginners.</p>
+        <a class="btn" href="https://www.amazon.com/Practice-Training-Include-Non-Absorbent-Surgical/dp/B07HQD6WRX/" target="_blank">View on Amazon ↗</a>
+      </div>
+    </div>
+    <div class="product-card">
+      <img src="https://m.media-amazon.com/images/I/71twi4-p-iL._SX522_.jpg" alt="SimCoach CPR Model"/>
+      <div class="product-info">
+        <h3>SimCoach CPR Training Model — Hands-Only</h3>
+        <p>Hands-only CPR training aid. Teaches proper compression technique for students. Portable and durable.</p>
+        <a class="btn" href="https://www.amazon.com/SimCoach-Training-Hands-only-Compression-Students/dp/B0C2GTGBWS/" target="_blank">View on Amazon ↗</a>
+      </div>
+    </div>
+    <div class="product-card">
+      <img src="https://m.media-amazon.com/images/I/61yhvJIdlVL._SX522_.jpg" alt="Pakcan Tourniquet"/>
+      <div class="product-info">
+        <h3>Pakcan Military-Grade Tactical Combat Tourniquet (Black)</h3>
+        <p>Rapid one-hand application, time-stamped. Used in first aid, EMS, law enforcement, and civilian survival.</p>
+        <a class="btn" href="https://www.amazon.com/Pakcan-Military-Grade-Tactical-Combat-Tourniquet/dp/B0FVTS314Q/" target="_blank">View on Amazon ↗</a>
+      </div>
+    </div>
+    <div class="product-card">
+      <img src="https://m.media-amazon.com/images/I/71kyZ-j4BVL._SX522_.jpg" alt="Gunshot Wound Trainer"/>
+      <div class="product-info">
+        <h3>MedEduQuest Gunshot Wound Packing Trainer</h3>
+        <p>Stop-the-bleed training kit. Placed inside a teddy bear's leg for a realistic wound packing &amp; splinting scenario. Fake blood included!</p>
+        <a class="btn" href="https://www.amazon.com/MedEduQuest-Gunshot-Packing-Trainer-Training/dp/B0C7ZW12FY/" target="_blank">View on Amazon ↗</a>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2>🎥 Videos — Cue These Up Before the Session</h2>
+    <div class="video-grid">
+      <div class="video-card">
+        <a class="video-thumb" href="https://www.youtube.com/watch?v=WQwlzd7vyKA" target="_blank">
+          <img src="https://img.youtube.com/vi/WQwlzd7vyKA/hqdefault.jpg" alt="Suture video"/>
+          <div class="play-btn"></div>
+        </a>
+        <div class="video-info">
+          <div class="tag">🩹 Suturing</div>
+          <h3>Beginners Guide: Learn EVERY Suture In 20 Minutes</h3>
+          <p>Suturing &amp; Surgical Skills By MedSync · 15:12</p>
+        </div>
+      </div>
+      <div class="video-card">
+        <a class="video-thumb" href="https://www.youtube.com/watch?v=VZqG-tcZvfE" target="_blank">
+          <img src="https://img.youtube.com/vi/VZqG-tcZvfE/hqdefault.jpg" alt="CPR video"/>
+          <div class="play-btn"></div>
+        </a>
+        <div class="video-info">
+          <div class="tag">🫀 CPR</div>
+          <h3>How to do Compression-Only CPR</h3>
+          <p>American Red Cross · 2:50 · Rate · Depth · Hand Placement</p>
+        </div>
+      </div>
+      <div class="video-card">
+        <a class="video-thumb" href="https://www.youtube.com/watch?v=2u7Ent_L5Uc" target="_blank">
+          <img src="https://img.youtube.com/vi/2u7Ent_L5Uc/hqdefault.jpg" alt="Tourniquet video"/>
+          <div class="play-btn"></div>
+        </a>
+        <div class="video-info">
+          <div class="tag">🩸 Tourniquet</div>
+          <h3>C-A-T Tourniquet Gen 7 One-Handed Application</h3>
+          <p>North American Rescue (Official) · 1:47</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2>📂 Resource Hub</h2>
+    <div class="card">
+      <p style="margin-bottom:0.75rem; font-size:0.93rem;">Access the full Suture Lab resource hub for printable materials:</p>
+      <div class="resource-links">
+        <a href="#" target="_blank">📄 Instructor Guide</a>
+        <a href="#" target="_blank">📝 Student Worksheet</a>
+        <a href="#" target="_blank">🌐 Full Resource Hub</a>
+      </div>
+      <div class="tip-box">💡 <strong>Tip:</strong> Print the student worksheet before the session — one per student or one per station pair works well.</div>
+    </div>
+  </section>
+  <section>
+    <h2>👋 Instructor Introduction — Pick One (~1 Minute)</h2>
+    <p style="font-size:0.9rem; color:#555; margin-bottom:1rem;">Start the session with a quick personal intro. Choose whichever prompt feels most natural — or go off-script entirely!</p>
+    <div class="intro-options">
+      <div class="intro-option">
+        <div class="opt-num">💬</div>
+        <strong>Anything About Yourself</strong>
+        Who you are and where you are in your medical journey.
+      </div>
+      <div class="intro-option">
+        <div class="opt-num">⭐</div>
+        <strong>Best Advice You've Ever Heard</strong>
+        Share a piece of advice that has truly stuck with you.
+      </div>
+      <div class="intro-option">
+        <div class="opt-num">💡</div>
+        <strong>What You Wish You'd Known</strong>
+        What do you wish someone had told you before going into medicine?
+      </div>
+      <div class="intro-option">
+        <div class="opt-num">🎯</div>
+        <strong>Any Quick Insight or Story</strong>
+        A moment, lesson, or tip meaningful for students curious about healthcare.
+      </div>
+    </div>
+    <div class="tip-box">🎤 Keep it to about 1 minute. Authenticity matters more than polish — students connect with the real you.</div>
+  </section>
+</main>
+<footer>Medical Interest Club · Suture Lab · May 19, 2026 · Hillside High School · Room 210</footer>
+</body>
+</html>
