@@ -1,0 +1,113 @@
+# README freshness & security check
+#
+# Plain-English: every time code is pushed, this robot
+#   1. re-runs the security checks (secret scan, .env hygiene, npm audit),
+#   2. warns if code changed but the README's Version history didn't,
+#   3. on the main branch, stamps today's date into the README's
+#      "Last updated" line/badge — and into the Security check date
+#      only when every check passed.
+# If a security check fails, the run turns red and opens a GitHub issue
+# listing exactly what failed. It never touches anything except README.md.
+
+name: README freshness & security check
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Security checks
+        id: sec
+        run: |
+          fails=""
+          echo "## Security checks ($(date -u +%F))" >> "$GITHUB_STEP_SUMMARY"
+
+          if git ls-files | grep -E '(^|/)\.env' | grep -v example; then
+            fails="$fails tracked-.env-file"
+            echo "- ❌ .env file tracked in git" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ✅ no .env files tracked" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if grep -rInE "sk-ant-[a-zA-Z0-9]{8}|ghp_[A-Za-z0-9]{20}|github_pat_[A-Za-z0-9]{20}|AKIA[0-9A-Z]{16}|-----BEGIN (RSA|EC|OPENSSH) PRIVATE KEY" \
+               --exclude-dir=node_modules --exclude-dir=.git --exclude=readme-freshness.yml .; then
+            fails="$fails secret-pattern-in-code"
+            echo "- ❌ secret-looking string found in code (see log)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ✅ secret scan clean" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ -f package.json ] && [ -f package-lock.json ]; then
+            if npm audit --audit-level=low > audit.txt 2>&1; then
+              echo "- ✅ npm audit: 0 vulnerabilities" >> "$GITHUB_STEP_SUMMARY"
+            else
+              fails="$fails npm-audit"
+              echo "- ❌ npm audit found vulnerabilities:" >> "$GITHUB_STEP_SUMMARY"
+              tail -20 audit.txt >> "$GITHUB_STEP_SUMMARY"
+            fi
+          else
+            echo "- ✅ npm audit: skipped (no npm dependencies)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "fails=${fails}" >> "$GITHUB_OUTPUT"
+
+      - name: Version-history guard
+        run: |
+          # If this push changed real files but README.md gained no new
+          # Version history row, leave a visible warning (never a failure).
+          changed=$(git diff --name-only HEAD~1..HEAD 2>/dev/null || true)
+          nondocs=$(echo "$changed" | grep -vE '^(README\.md|TEMPLATE-README\.md|docs/)' || true)
+          if [ -n "$nondocs" ] && ! git diff HEAD~1..HEAD -- README.md | grep -q '^+.*|'; then
+            echo "::warning::Code changed but README.md's Version history has no new entry for this change."
+            echo "- ⚠️ Reminder: add a Version history row to README.md for this change." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Stamp README dates (default branch only)
+        if: github.ref_name == github.event.repository.default_branch
+        env:
+          SEC_FAILS: ${{ steps.sec.outputs.fails }}
+        run: |
+          [ -f README.md ] || { echo "no README.md yet — nothing to stamp"; exit 0; }
+          TODAY=$(date -u +%F)
+          BADGE=$(date -u +%Y--%m--%d)
+          sed -i "s/\*\*Last updated:\*\* [0-9-]* <!-- readme-last-updated -->/**Last updated:** ${TODAY} <!-- readme-last-updated -->/" README.md
+          sed -i "s/last_updated-[0-9]*--[0-9]*--[0-9]*-blue/last_updated-${BADGE}-blue/" README.md
+          if [ -z "$SEC_FAILS" ]; then
+            sed -i "s/\*\*Checks performed on [0-9-]*:\*\* <!-- security-check-date -->/**Checks performed on ${TODAY}:** <!-- security-check-date -->/" README.md
+          fi
+          if ! git diff --quiet README.md; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add README.md
+            git commit -m "docs: refresh README freshness stamps"
+            git push
+          fi
+
+      - name: Open issue if a security check failed
+        if: steps.sec.outputs.fails != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FAILS: ${{ steps.sec.outputs.fails }}
+        run: |
+          title="Security check failed: ${FAILS}"
+          existing=$(gh issue list --state open --search "in:title \"Security check failed\"" --json number --jq '.[0].number' || true)
+          body="The README freshness workflow found problems on $(date -u +%F):${FAILS}. See the failed run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. The README's Security check date was NOT advanced."
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
+          echo "::error::Security checks failed:${FAILS}"
+          exit 1
